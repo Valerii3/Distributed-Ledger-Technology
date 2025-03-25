@@ -1,84 +1,122 @@
 import random
 
+
 # 1) Fast primality testing
-def miller_rabin_test(d, n):
+def miller_rabin_test(d: int, n: int) -> bool:
     """
-    One round of the Miller-Rabin test.
-    Checks if 'n' is definitely composite or probably prime.
-    Returns False if 'n' is composite, True if 'n' is probably prime for this round.
+    Performs one round of the Miller-Rabin primality test.
+
+    Args:
+        d: Odd part of n - 1, such that n - 1 = d * 2^r
+        n: The number to test for primality
+
+    Returns:
+        False if 'n' is definitely composite, True if 'n' is probably prime in this round.
     """
-    a = 2 + random.randint(1, n - 4)
-    x = pow(a, d, n)  # a^d mod n
-    if x == 1 or x == n - 1:
+    a = random.randint(2, n - 2)
+    x = pow(a, d, n)
+
+    if x in (1, n - 1):
         return True
-    # Keep squaring x while d doesn't reach n-1
+
     while d != n - 1:
-        x = (x * x) % n
+        x = pow(x, 2, n)
         d *= 2
         if x == 1:
             return False
         if x == n - 1:
             return True
+
     return False
 
-def is_prime(n, k=10):
+
+def is_prime(n: int, k: int = 10) -> bool:
     """
-    Miller-Rabin primality test to check primality for 'n' with 'k' rounds.
-    Returns True if 'n' is probably prime, False otherwise.
+    Determines whether a number is probably prime using the Miller-Rabin test.
+
+    Args:
+        n: Number to check
+        k: Number of rounds to run the test (more rounds = higher accuracy)
+
+    Returns:
+        True if n is probably prime, False if composite
     """
-    # Handle simple cases:
     if n < 2:
         return False
-    # Check small primes directly:
+
+    # Quickly check small known primes
     small_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
     for sp in small_primes:
         if n == sp:
             return True
-        if n % sp == 0 and n != sp:
+        if n % sp == 0:
             return False
 
-    # Find d such that n-1 = d * 2^r
+    # Find d such that n-1 = d * 2^r with d odd
     d = n - 1
     while d % 2 == 0:
         d //= 2
 
-    # k rounds of testing
+    # Run Miller-Rabin k times
     for _ in range(k):
         if not miller_rabin_test(d, n):
             return False
+
     return True
 
-def generate_prime(bits=512):
+
+def generate_prime(bits: int = 512) -> int:
     """
-    Generate a prime of approximately 'bits' bits using the is_prime() test.
+    Generates a random prime number of specified bit length.
+
+    Args:
+        bits: The desired bit length of the prime
+
+    Returns:
+        A prime number with approximately 'bits' bits
     """
     while True:
         candidate = random.getrandbits(bits)
-        # Ensure it's odd and has the correct bit length
-        candidate |= (1 << bits-1) | 1
+        candidate |= (1 << bits - 1) | 1  # Ensure high bit and odd
         if is_prime(candidate):
             return candidate
 
 
-# 2) Extended Euclidean (modular inverse)
-def extended_gcd(a, b):
+# Extended Euclidean Algorithm & Inverse
+def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
     """
-    Returns (g, x, y) such that a*x + b*y = g = gcd(a, b).
+    Computes the Extended Euclidean Algorithm.
+
+    Args:
+        a: First integer
+        b: Second integer
+
+    Returns:
+        A tuple (gcd, x, y) where a*x + b*y = gcd
     """
     if b == 0:
-        return (a, 1, 0)
-    else:
-        g, x1, y1 = extended_gcd(b, a % b)
-        x = y1
-        y = x1 - (a // b) * y1
-        return (g, x, y)
+        return a, 1, 0
+    g, x1, y1 = extended_gcd(b, a % b)
+    x = y1
+    y = x1 - (a // b) * y1
+    return g, x, y
 
-def mod_inverse(e, phi):
+
+def mod_inverse(e: int, phi: int) -> int:
     """
-    Compute the modular inverse of e modulo phi using Extended Euclidean Algorithm.
+    Computes the modular inverse of e modulo phi.
+
+    Args:
+        e: The number to invert
+        phi: The modulus
+
+    Returns:
+        The modular inverse of e modulo phi
+
+    Raises:
+        Exception if the modular inverse does not exist
     """
     g, x, _ = extended_gcd(e, phi)
     if g != 1:
         raise Exception('Modular inverse does not exist!')
-    else:
-        return x % phi
+    return x % phi

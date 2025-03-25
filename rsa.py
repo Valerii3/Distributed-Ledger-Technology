@@ -1,21 +1,31 @@
 from utils import generate_prime, extended_gcd, mod_inverse
 import random
+from math import gcd
 
-def generate_rsa_keys(bits=512):
+
+def generate_rsa_keys(bits: int = 512) -> tuple[int, int, int]:
     """
-    Generates (e, d, n).
+    Generates an RSA key pair (e, d, n).
+
+    Args:
+        bits: Bit length of each prime number (p and q)
+
+    Returns:
+        Tuple containing:
+            e - Public exponent
+            d - Private exponent
+            n - Modulus (p * q)
     """
     p = generate_prime(bits)
     q = generate_prime(bits)
     n = p * q
-    phi = (p - 1)*(q - 1)
+    phi = (p - 1) * (q - 1)
     e = 65537
 
-    # If gcd(e, phi) != 1, choose another e
+    # Ensure e and phi are coprime
     g, _, _ = extended_gcd(e, phi)
     if g != 1:
         e = 3
-        from math import gcd
         while gcd(e, phi) != 1:
             e += 2
 
@@ -23,30 +33,62 @@ def generate_rsa_keys(bits=512):
     return e, d, n
 
 
-def rsa_encrypt(m, e, n):
+def rsa_encrypt(m: int, e: int, n: int) -> int:
     """
-    Encrypt integer message 'm' with public key (e, n).
-    Returns the ciphertext as an integer: c = m^e mod n.
+    Encrypts a message using the RSA public key.
+
+    Args:
+        m: Plaintext message as an integer
+        e: Public exponent
+        n: Modulus
+
+    Returns:
+        The ciphertext as an integer
     """
     return pow(m, e, n)
 
-def rsa_decrypt(c, d, n):
+
+def rsa_decrypt(c: int, d: int, n: int) -> int:
     """
-    Decrypt integer ciphertext 'c' with private key (d, n).
-    Returns the original message as an integer: m = c^d mod n.
+    Decrypts a ciphertext using the RSA private key.
+
+    Args:
+        c: Ciphertext as an integer
+        d: Private exponent
+        n: Modulus
+
+    Returns:
+        The decrypted message as an integer
     """
     return pow(c, d, n)
 
 
-def rsa_sign(message_int, d, n):
+def rsa_sign(message_int: int, d: int, n: int) -> int:
     """
-    Sign an integer 'message_int' with the private key (d, n).
-    Signature s = (message_int^d) mod n
+    Signs a message using the RSA private key.
+
+    Args:
+        message_int: Message represented as an integer
+        d: Private exponent
+        n: Modulus
+
+    Returns:
+        The RSA signature as an integer
     """
     return pow(message_int, d, n)
 
-def rsa_verify(signature_int, message_int, e, n):
+
+def rsa_verify(signature_int: int, message_int: int, e: int, n: int) -> bool:
     """
-    Verify an RSA signature: check if (signature_int^e) mod n == message_int
+    Verifies an RSA signature using the public key.
+
+    Args:
+        signature_int: The RSA signature as an integer
+        message_int: The original message as an integer
+        e: Public exponent
+        n: Modulus
+
+    Returns:
+        True if the signature is valid, False otherwise
     """
     return pow(signature_int, e, n) == message_int

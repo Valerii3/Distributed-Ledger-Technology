@@ -8,14 +8,33 @@ from rsa import (
     rsa_verify
 )
 
-def bytes_to_long(b):
+
+def bytes_to_long(b: bytes) -> int:
+    """
+    Converts a byte sequence to a long integer.
+    """
     return int.from_bytes(b, byteorder='big')
 
-def long_to_bytes(n):
+
+def long_to_bytes(n: int) -> bytes:
+    """
+    Converts a long integer back to bytes.
+    """
     length = (n.bit_length() + 7) // 8 or 1
     return n.to_bytes(length, byteorder='big')
 
-def read_key_file(path, key_type):
+
+def read_key_file(path: str, key_type: str) -> tuple[int, int]:
+    """
+    Reads a public or private RSA key from a file.
+
+    Args:
+        path: Path to the key file.
+        key_type: A string indicating "public" or "private" (used for error messages).
+
+    Returns:
+        Tuple containing the key values (e or d, n).
+    """
     try:
         with open(path, "r") as f:
             lines = f.read().split()
@@ -26,7 +45,11 @@ def read_key_file(path, key_type):
         print(f"Error reading {key_type} key file '{path}': {ex}")
         sys.exit(1)
 
-def generate_keys(args):
+
+def generate_keys(args: argparse.Namespace) -> None:
+    """
+    Generates RSA keys and saves them to files.
+    """
     e, d, n = generate_rsa_keys(args.bits)
     with open(args.public_key, "w") as pubf:
         pubf.write(f"{e}\n{n}\n")
@@ -36,7 +59,11 @@ def generate_keys(args):
     print(f"  - {args.public_key}")
     print(f"  - {args.private_key}")
 
-def encrypt_file(args):
+
+def encrypt_file(args: argparse.Namespace) -> None:
+    """
+    Encrypts the content of a file using RSA and writes the ciphertext to a file.
+    """
     if not args.input_file:
         print("Error: Must specify --input_file for encryption.")
         sys.exit(1)
@@ -55,7 +82,11 @@ def encrypt_file(args):
 
     print(f"Encrypted data saved to {args.output_ciphertext}")
 
-def decrypt_file(args):
+
+def decrypt_file(args: argparse.Namespace) -> None:
+    """
+    Decrypts an RSA-encrypted file and writes the plaintext bytes to a file.
+    """
     if not args.ciphertext_file:
         print("Error: Must specify --ciphertext_file for decryption.")
         sys.exit(1)
@@ -78,7 +109,11 @@ def decrypt_file(args):
 
     print(f"Decrypted data saved to {args.output_decrypted}")
 
-def sign_file(args):
+
+def sign_file(args: argparse.Namespace) -> None:
+    """
+    Signs a file using the RSA private key and saves the signature to a file.
+    """
     if not args.input_file:
         print("Error: Must specify --input_file for signing.")
         sys.exit(1)
@@ -96,7 +131,11 @@ def sign_file(args):
 
     print(f"Signature saved to {args.output_signature}")
 
-def verify_signature(args):
+
+def verify_signature(args: argparse.Namespace) -> None:
+    """
+    Verifies a digital signature using the RSA public key.
+    """
     if not args.input_file or not args.signature_file:
         print("Error: Must specify both --input_file and --signature_file for verification.")
         sys.exit(1)
@@ -118,7 +157,11 @@ def verify_signature(args):
     is_ok = rsa_verify(sig_int, m_int, e, n)
     print("Signature valid!" if is_ok else "Signature invalid!")
 
-def parse_arguments():
+
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parses and returns command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         description="A simple RSA demonstration using file-based input/output."
     )
@@ -139,6 +182,7 @@ def parse_arguments():
     parser.add_argument("--output_signature", default="signature.txt", help="Output path for signature.")
 
     return parser.parse_args()
+
 
 def main():
     args = parse_arguments()
