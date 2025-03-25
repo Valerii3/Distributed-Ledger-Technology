@@ -1,8 +1,6 @@
 import random
 
-# -------------------------
 # 1) Fast primality testing
-# -------------------------
 def miller_rabin_test(d, n):
     """
     One round of the Miller-Rabin test.
@@ -61,9 +59,8 @@ def generate_prime(bits=512):
         if is_prime(candidate):
             return candidate
 
-# --------------------------------
+
 # 2) Extended Euclidean (modular inverse)
-# --------------------------------
 def extended_gcd(a, b):
     """
     Returns (g, x, y) such that a*x + b*y = g = gcd(a, b).
@@ -79,7 +76,6 @@ def extended_gcd(a, b):
 def mod_inverse(e, phi):
     """
     Compute the modular inverse of e modulo phi using Extended Euclidean Algorithm.
-    i.e. d such that (d*e) % phi = 1.
     """
     g, x, _ = extended_gcd(e, phi)
     if g != 1:

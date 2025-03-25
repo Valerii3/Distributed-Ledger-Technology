@@ -4,7 +4,6 @@ import random
 def generate_rsa_keys(bits=512):
     """
     Generates (e, d, n).
-    NOTE: In real usage, consider 2048 bits or more, not 512.
     """
     p = generate_prime(bits)
     q = generate_prime(bits)
